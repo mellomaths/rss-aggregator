@@ -1,0 +1,226 @@
+{
+	"info": {
+		"_postman_id": "ad62a007-6892-42d3-9a37-f4b951c4789b",
+		"name": "github.com/mellomaths/rss-aggregator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6013725"
+	},
+	"item": [
+		{
+			"name": "/v1/healthz",
+			"item": []
+		},
+		{
+			"name": "/v1/users",
+			"item": []
+		},
+		{
+			"name": "/v1/feeds",
+			"item": [
+				{
+					"name": "200 /v1/feeds?limit=100&offset=0",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds?limit=100&offset=0",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/v1/feeds/follows",
+			"item": [
+				{
+					"name": "201 /v1/feeds/follows",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"feed_id\": \"20e2ef48-b1f6-45e0-b3c4-778cc456424a\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds/follows",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds",
+								"follows"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 /v1/feeds/follows?limit=100&offset=0",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds/follows?limit=100&offset=0",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds",
+								"follows"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "204 /v1/feeds/follows/{feedFollowID}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds/follows/f792e04f-b587-4f65-afe7-dec07592522b",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds",
+								"follows",
+								"f792e04f-b587-4f65-afe7-dec07592522b"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/v1/posts",
+			"item": [
+				{
+					"name": "200 /v1/posts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/v1/posts?limit=100&offset=0",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"posts"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "ApiKey {{apiKey}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": ""
+		},
+		{
+			"key": "apiKey",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "auth",
+			"value": ""
+		}
+	]
+}
