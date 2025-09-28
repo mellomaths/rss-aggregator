@@ -24,12 +24,12 @@ func (apiCfg *ApiConfig) HandleCreateUser(w http.ResponseWriter, r *http.Request
 	params := models.CreateUserParams{}
 	err := params.Decode(r)
 	if err != nil {
-		respondWithError(w, 400, "INVALID_REQUEST_BODY", fmt.Sprintf("Error decoding JSON: %v", err))
+		respondWithError(w, http.StatusBadRequest, "INVALID_REQUEST_BODY", fmt.Sprintf("Error decoding JSON: %v", err))
 		return
 	}
 	err = params.Validate()
 	if err != nil {
-		respondWithError(w, 400, "VALIDATION_ERROR", fmt.Sprintf("Error validating JSON: %v", err))
+		respondWithError(w, http.StatusBadRequest, "VALIDATION_ERROR", err.Error())
 		return
 	}
 	user, err := apiCfg.DATABASE.CreateUser(r.Context(), database.CreateUserParams{
@@ -40,12 +40,12 @@ func (apiCfg *ApiConfig) HandleCreateUser(w http.ResponseWriter, r *http.Request
 		ApiKey:    generateRandomHex(),
 	})
 	if err != nil {
-		respondWithError(w, 400, "RECORD_CREATE_ERROR", fmt.Sprintf("Error creating user: %v", err))
+		respondWithError(w, http.StatusBadRequest, "RECORD_CREATE_ERROR", fmt.Sprintf("Error creating user: %v", err))
 		return
 	}
-	respondWithJson(w, 201, models.NewUserFromDatabase(user))
+	respondWithJson(w, http.StatusCreated, models.NewUserFromDatabase(user))
 }
 
 func (apiCfg *ApiConfig) HandleGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
-	respondWithJson(w, 200, models.NewUserFromDatabase(user))
+	respondWithJson(w, http.StatusOK, models.NewUserFromDatabase(user))
 }

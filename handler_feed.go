@@ -14,12 +14,12 @@ func (apiCfg *ApiConfig) HandleCreateFeed(w http.ResponseWriter, r *http.Request
 	params := models.CreateFeedParams{}
 	err := params.Decode(r)
 	if err != nil {
-		respondWithError(w, 400, "INVALID_REQUEST_BODY", fmt.Sprintf("Error decoding JSON: %v", err))
+		respondWithError(w, http.StatusBadRequest, "INVALID_REQUEST_BODY", fmt.Sprintf("Error decoding JSON: %v", err))
 		return
 	}
 	err = params.Validate()
 	if err != nil {
-		respondWithError(w, 400, "VALIDATION_ERROR", fmt.Sprintf("Error validating JSON: %v", err))
+		respondWithError(w, http.StatusBadRequest, "VALIDATION_ERROR", err.Error())
 		return
 	}
 	feed, err := apiCfg.DATABASE.CreateFeed(r.Context(), database.CreateFeedParams{
@@ -31,8 +31,8 @@ func (apiCfg *ApiConfig) HandleCreateFeed(w http.ResponseWriter, r *http.Request
 		UserID:    user.ID,
 	})
 	if err != nil {
-		respondWithError(w, 400, "RECORD_CREATE_ERROR", fmt.Sprintf("Error creating feed: %v", err))
+		respondWithError(w, http.StatusBadRequest, "RECORD_CREATE_ERROR", fmt.Sprintf("Error creating feed: %v", err))
 		return
 	}
-	respondWithJson(w, 201, models.NewFeedFromDatabase(feed))
+	respondWithJson(w, http.StatusCreated, models.NewFeedFromDatabase(feed))
 }
