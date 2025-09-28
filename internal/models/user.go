@@ -39,11 +39,11 @@ type User struct {
 }
 
 func NewUserFromDatabase(user database.User) *User {
-	u := &User{}
-	u.ID = user.ID
-	u.CreatedAt = user.CreatedAt
-	u.UpdatedAt = user.UpdatedAt
-	u.Name = user.Name
-	u.ApiKey = user.ApiKey
-	return u
+	return &User{
+		ID:        user.ID,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Name:      user.Name,
+		ApiKey:    user.ApiKey,
+	}
 }

@@ -112,14 +112,14 @@ type Feed struct {
 }
 
 func NewFeedFromDatabase(feed database.Feed) *Feed {
-	f := &Feed{}
-	f.ID = feed.ID
-	f.CreatedAt = feed.CreatedAt
-	f.UpdatedAt = feed.UpdatedAt
-	f.Name = feed.Name
-	f.Url = feed.Url
-	f.UserID = feed.UserID
-	return f
+	return &Feed{
+		ID:        feed.ID,
+		CreatedAt: feed.CreatedAt,
+		UpdatedAt: feed.UpdatedAt,
+		Name:      feed.Name,
+		Url:       feed.Url,
+		UserID:    feed.UserID,
+	}
 }
 
 func NewFeedsFromDatabase(feeds []database.Feed) []*Feed {
