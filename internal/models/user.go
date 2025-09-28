@@ -1,11 +1,34 @@
-package main
+package models
 
 import (
+	"encoding/json"
+	"errors"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/mellomaths/rss-aggregator/internal/database"
 )
+
+type CreateUserParams struct {
+	Name string `json:"name"`
+}
+
+func (b *CreateUserParams) Decode(r *http.Request) error {
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (b *CreateUserParams) Validate() error {
+	if b.Name == "" {
+		return errors.New("name is required")
+	}
+	return nil
+}
 
 type User struct {
 	ID        uuid.UUID `json:"id"`

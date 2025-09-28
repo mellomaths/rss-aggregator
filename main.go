@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/mellomaths/rss-aggregator/internal/database"
+	"github.com/mellomaths/rss-aggregator/internal/infra"
 
 	_ "github.com/lib/pq"
 )
@@ -25,10 +26,8 @@ func NewApiConfig(conn *sql.DB) *ApiConfig {
 
 func main() {
 	godotenv.Load(".env")
-	portString := getEnvironmentVariable("PORT")
-	databaseDriver := getEnvironmentVariable("DATABASE_DRIVER")
-	databaseUrl := getEnvironmentVariable("DATABASE_URL")
-	conn, err := sql.Open(databaseDriver, databaseUrl)
+	settings := infra.NewSettings()
+	conn, err := sql.Open(settings.DatabaseDriver, settings.DatabaseUrl)
 	if err != nil {
 		log.Fatal("Error connecting to database: " + err.Error())
 	}
@@ -43,15 +42,16 @@ func main() {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 	v1Router := chi.NewRouter()
-	v1Router.Get("/healthz", handlerReadiness)
-	v1Router.Post("/users", apiCfg.handlerCreateUser)
-	v1Router.Get("/users", apiCfg.handlerGetUser)
+	v1Router.Get("/healthz", handleReadiness)
+	v1Router.Post("/users", apiCfg.HandleCreateUser)
+	v1Router.Get("/users", apiCfg.MiddlewareAuth(apiCfg.HandleGetUser))
+	v1Router.Post("/feeds", apiCfg.MiddlewareAuth(apiCfg.HandleCreateFeed))
 	router.Mount("/v1", v1Router)
 	server := &http.Server{
-		Addr:    ":" + portString,
+		Addr:    ":" + settings.Port,
 		Handler: router,
 	}
-	log.Printf("Server starting on port %v", portString)
+	log.Printf("Server starting on port %v", settings.Port)
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
