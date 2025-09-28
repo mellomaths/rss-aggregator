@@ -1,10 +1,17 @@
 # RSS Aggregator
 
-A Go-based REST API for aggregating and managing RSS feeds with user authentication and database persistence.
+A Go-based REST API for aggregating and managing RSS feeds with user authentication, RSS validation, and database persistence.
 
 ## Features
 
-- **User Management**: Create and manage users with unique IDs
+- **User Management**: Create and manage users with unique IDs and API keys
+- **RSS Feed Management**: Add, validate, and manage RSS feeds with real-time validation
+- **Feed Following System**: Users can follow/unfollow specific RSS feeds
+- **RSS Scraping**: Background service that automatically scrapes RSS feeds and stores posts
+- **Post Management**: View and manage posts from followed feeds with pagination
+- **RSS Validation**: Automatic validation of RSS feed URLs to ensure they point to valid RSS content
+- **Pagination**: Built-in pagination support for feeds, posts, and feed follows
+- **Concurrent Processing**: Multi-threaded RSS scraping with configurable concurrency
 - **RESTful API**: Clean HTTP endpoints with JSON responses
 - **Database Integration**: PostgreSQL with SQLC for type-safe database operations
 - **CORS Support**: Cross-origin resource sharing enabled
@@ -27,7 +34,45 @@ A Go-based REST API for aggregating and managing RSS feeds with user authenticat
 ### Users
 - `POST /v1/users` - Create a new user
   - Request body: `{"name": "string"}`
-  - Response: `201` with user object
+  - Response: `201` with user object including API key
+
+- `GET /v1/users` - Get current user info (requires authentication)
+  - Headers: `Authorization: ApiKey <api_key>`
+  - Response: `200` with user object
+
+### Feeds
+- `POST /v1/feeds` - Create a new RSS feed (requires authentication)
+  - Headers: `Authorization: ApiKey <api_key>`
+  - Request body: `{"name": "string", "url": "string"}`
+  - Response: `201` with feed object
+  - Validation: URL must be a valid RSS feed (HTTP/HTTPS)
+  - Examples:
+      - `{"name": "Lane's Blog", "url": "https://www.wagslane.dev/index.xml"}`
+      - `{"name": "Boot.dev Blog", "url": "https://blog.boot.dev/index.xml"}`
+
+- `GET /v1/feeds` - Get all available feeds (public endpoint)
+  - Response: `200` with feed list
+
+### Feed Following
+- `POST /v1/feeds/follows` - Follow a specific feed (requires authentication)
+  - Headers: `Authorization: ApiKey <api_key>`
+  - Request body: `{"feed_id": "uuid"}`
+  - Response: `201` with feed follow object
+
+- `GET /v1/feeds/follows` - Get feeds followed by user (requires authentication)
+  - Headers: `Authorization: ApiKey <api_key>`
+  - Query parameters: `limit` (int), `offset` (int)
+  - Response: `200` with paginated feed follows list
+
+- `DELETE /v1/feeds/follows/{feedFollowID}` - Unfollow a feed (requires authentication)
+  - Headers: `Authorization: ApiKey <api_key>`
+  - Response: `204` No Content
+
+### Posts
+- `GET /v1/posts` - Get posts from followed feeds (requires authentication)
+  - Headers: `Authorization: ApiKey <api_key>`
+  - Query parameters: `limit` (int), `offset` (int)
+  - Response: `200` with paginated posts list
 
 ## Getting Started
 
@@ -76,14 +121,47 @@ The server will start on the port specified in your `PORT` environment variable 
 ## Project Structure
 
 ```
-├── internal/database/     # Database models and queries
+├── internal/
+│   ├── auth/            # Authentication middleware
+│   ├── database/        # Database models and queries
+│   ├── infra/           # Infrastructure settings
+│   └── models/          # Domain models (User, Feed, Paginated)
 ├── sql/
-│   ├── queries/          # SQLC query definitions
-│   └── schema/           # Database migrations
-├── handler_*.go          # HTTP request handlers
-├── main.go              # Application entry point
-└── settings.go          # Environment configuration
+│   ├── queries/         # SQLC query definitions
+│   └── schema/          # Database migrations
+├── handler_*.go         # HTTP request handlers
+├── middleware_*.go      # HTTP middleware
+├── main.go             # Application entry point
+└── settings.go         # Environment configuration
 ```
+
+## RSS Scraping
+
+The application includes a background RSS scraper that:
+
+- **Automatic Scraping**: Continuously scrapes RSS feeds every 10 minutes
+- **Concurrent Processing**: Processes up to 10 feeds simultaneously
+- **Post Storage**: Automatically stores new posts from RSS feeds
+- **Duplicate Prevention**: Prevents duplicate posts using unique URL constraints
+- **Feed Tracking**: Tracks last fetch time for each feed to optimize scraping
+
+## RSS Validation
+
+The API includes robust RSS validation that:
+
+- Validates URLs are accessible (HTTP/HTTPS)
+- Checks content type for RSS/XML/Atom feeds
+- Parses and validates RSS structure
+- Provides detailed error messages for invalid feeds
+- Uses a 200ms timeout for quick validation
+
+## Data Models
+
+- **Users**: User accounts with API keys for authentication
+- **Feeds**: RSS feed sources with validation and metadata
+- **Feed Follows**: User subscriptions to specific feeds
+- **Posts**: Individual articles/posts from RSS feeds with metadata
+- **Pagination**: Consistent pagination across all list endpoints
 
 ## Development
 
