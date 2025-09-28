@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"net/http"
@@ -27,62 +26,6 @@ func (b *CreateFeedParams) Decode(r *http.Request) error {
 	return nil
 }
 
-// RSSFeed represents the basic structure of an RSS feed for validation
-type RSSFeed struct {
-	XMLName xml.Name `xml:"rss"`
-	Version string   `xml:"version,attr"`
-	Channel struct {
-		Title       string `xml:"title"`
-		Description string `xml:"description"`
-		Link        string `xml:"link"`
-	} `xml:"channel"`
-}
-
-func (b *RSSFeed) Decode(resp *http.Response) error {
-	decoder := xml.NewDecoder(resp.Body)
-	err := decoder.Decode(b)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (b *RSSFeed) Validate() error {
-	if b.XMLName.Local != "rss" {
-		return errors.New("not a valid RSS feed")
-	}
-	return nil
-}
-
-// validateRSSURL checks if the provided URL points to a valid RSS feed
-func validateRSSURL(url string) error {
-	client := &http.Client{
-		Timeout: 200 * time.Millisecond,
-	}
-	resp, err := client.Get(url)
-	if err != nil {
-		return fmt.Errorf("failed to fetch URL: %v", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("URL returned status code: %d", resp.StatusCode)
-	}
-	contentType := resp.Header.Get("Content-Type")
-	if !strings.Contains(strings.ToLower(contentType), "xml") &&
-		!strings.Contains(strings.ToLower(contentType), "rss") &&
-		!strings.Contains(strings.ToLower(contentType), "atom") {
-		return fmt.Errorf("URL does not appear to be an RSS feed (content-type: %s)", contentType)
-	}
-	rssFeed := RSSFeed{}
-	if err := rssFeed.Decode(resp); err != nil {
-		return fmt.Errorf("failed to parse as RSS feed: %v", err)
-	}
-	if err := rssFeed.Validate(); err != nil {
-		return fmt.Errorf("failed to validate RSS feed: %v", err)
-	}
-	return nil
-}
-
 func (b *CreateFeedParams) Validate() error {
 	if b.Name == "" {
 		return errors.New("name is required")
@@ -94,11 +37,10 @@ func (b *CreateFeedParams) Validate() error {
 	if !isValidUrl {
 		return errors.New("url must start with https:// or http://")
 	}
-	// Validate that the URL points to a valid RSS feed
-	if err := validateRSSURL(b.Url); err != nil {
+	_, err := GetRSSFeedFromURL(b.Url)
+	if err != nil {
 		return fmt.Errorf("invalid RSS URL: %v", err)
 	}
-
 	return nil
 }
 

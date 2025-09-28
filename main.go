@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	"github.com/mellomaths/rss-aggregator/internal/database"
 	"github.com/mellomaths/rss-aggregator/internal/infra"
+	"github.com/mellomaths/rss-aggregator/internal/scraper"
 
 	_ "github.com/lib/pq"
 )
@@ -31,7 +33,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Error connecting to database: " + err.Error())
 	}
+	defer conn.Close()
 	apiCfg := NewApiConfig(conn)
+	rssScraper := scraper.RSSScraper{
+		Database:            apiCfg.DATABASE,
+		Concurrency:         10,
+		TimeBetweenRequests: 10 * time.Minute,
+	}
+	go rssScraper.Start()
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
