@@ -36,3 +36,26 @@ func (apiCfg *ApiConfig) HandleCreateFeed(w http.ResponseWriter, r *http.Request
 	}
 	respondWithJson(w, http.StatusCreated, models.NewFeedFromDatabase(feed))
 }
+
+func (apiCfg *ApiConfig) HandleGetAllFeeds(w http.ResponseWriter, r *http.Request) {
+	pagination := models.PaginatedParams{}
+	if err := pagination.Decode(r); err != nil {
+		respondWithError(w, http.StatusBadRequest, "PAGINATION_ERROR", fmt.Sprintf("Error getting feeds: %v", err))
+		return
+	}
+	feeds, err := apiCfg.DATABASE.GetAllFeeds(r.Context(), database.GetAllFeedsParams{
+		Limit:  pagination.Limit,
+		Offset: pagination.Offset,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "RECORD_GET_ERROR", fmt.Sprintf("Error getting feeds: %v", err))
+		return
+	}
+	data := models.NewFeedsFromDatabase(feeds)
+	respondWithJson(w, http.StatusOK, models.Paginated[*models.Feed]{
+		Data:   data,
+		Total:  len(data),
+		Offset: int(pagination.Offset),
+		Limit:  int(pagination.Limit),
+	})
+}

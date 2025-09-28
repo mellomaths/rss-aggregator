@@ -121,3 +121,11 @@ func NewFeedFromDatabase(feed database.Feed) *Feed {
 	f.UserID = feed.UserID
 	return f
 }
+
+func NewFeedsFromDatabase(feeds []database.Feed) []*Feed {
+	fs := make([]*Feed, len(feeds))
+	for i, feed := range feeds {
+		fs[i] = NewFeedFromDatabase(feed)
+	}
+	return fs
+}
