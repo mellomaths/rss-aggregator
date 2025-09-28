@@ -1,6 +1,6 @@
 # RSS Aggregator
 
-A Go-based REST API for aggregating and managing RSS feeds with user authentication, RSS validation, and database persistence.
+A comprehensive Go-based RSS feed aggregation platform that allows users to discover, follow, and consume RSS feeds through a robust REST API. The system features real-time RSS validation, automatic background scraping, user authentication, and a complete feed following system with post management.
 
 ## Features
 
@@ -122,17 +122,51 @@ The server will start on the port specified in your `PORT` environment variable 
 
 ```
 ├── internal/
-│   ├── auth/            # Authentication middleware
-│   ├── database/        # Database models and queries
-│   ├── infra/           # Infrastructure settings
-│   └── models/          # Domain models (User, Feed, Paginated)
+│   ├── auth/
+│   │   └── auth.go              # Authentication utilities
+│   ├── database/
+│   │   ├── db.go                # Database connection
+│   │   ├── models.go            # Database models
+│   │   ├── feed_follows.sql.go  # Feed follows queries (SQLC generated)
+│   │   ├── feeds.sql.go         # Feeds queries (SQLC generated)
+│   │   ├── posts.sql.go         # Posts queries (SQLC generated)
+│   │   └── users.sql.go         # Users queries (SQLC generated)
+│   ├── infra/
+│   │   └── settings.go          # Environment configuration
+│   ├── models/
+│   │   ├── feed_follow.go       # Feed follow domain model
+│   │   ├── feed.go              # Feed domain model with RSS validation
+│   │   ├── paginated.go         # Pagination utilities
+│   │   ├── post.go              # Post domain model
+│   │   ├── rss.go               # RSS parsing and validation
+│   │   └── user.go              # User domain model
+│   └── scraper/
+│       └── rss_scraper.go       # Background RSS scraping service
 ├── sql/
-│   ├── queries/         # SQLC query definitions
-│   └── schema/          # Database migrations
-├── handler_*.go         # HTTP request handlers
-├── middleware_*.go      # HTTP middleware
-├── main.go             # Application entry point
-└── settings.go         # Environment configuration
+│   ├── queries/
+│   │   ├── feed_follows.sql     # Feed follows SQL queries
+│   │   ├── feeds.sql            # Feeds SQL queries
+│   │   ├── posts.sql            # Posts SQL queries
+│   │   └── users.sql            # Users SQL queries
+│   └── schema/
+│       ├── 001_users.sql        # Users table migration
+│       ├── 002_users_api_key.sql # API keys migration
+│       ├── 003_feeds.sql        # Feeds table migration
+│       ├── 004_feed_follows.sql # Feed follows table migration
+│       ├── 005_feeds_lastfetchedat.sql # Feed tracking migration
+│       └── 006_posts.sql        # Posts table migration
+├── handler_feed_follows.go      # Feed follow HTTP handlers
+├── handler_feed.go              # Feed HTTP handlers
+├── handler_posts.go             # Posts HTTP handlers
+├── handler_readiness.go         # Health check handler
+├── handler_user.go              # User HTTP handlers
+├── middleware_auth.go           # Authentication middleware
+├── json.go                      # JSON response utilities
+├── main.go                      # Application entry point
+├── sqlc.yaml                    # SQLC configuration
+├── Justfile                     # Build automation
+├── go.mod                       # Go module definition
+└── go.sum                       # Go module checksums
 ```
 
 ## RSS Scraping
