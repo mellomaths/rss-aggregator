@@ -8,15 +8,238 @@
 	"item": [
 		{
 			"name": "/v1/healthz",
-			"item": []
+			"item": [
+				{
+					"name": "200 /v1/healthz",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/v1/healthz",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"healthz"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "/v1/users",
-			"item": []
+			"item": [
+				{
+					"name": "201 /v1/users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response should contain api_key\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response).to.have.property('api_key');\r",
+									"    const apiKey = response.api_key;\r",
+									"    pm.expect(apiKey).to.not.be.null;\r",
+									"    pm.expect(apiKey).to.be.a('string');\r",
+									"    pm.expect(apiKey).to.not.be.empty;\r",
+									"    // Validate API key format (64-character hex string)\r",
+									"    pm.expect(apiKey).to.have.lengthOf(64);\r",
+									"    pm.expect(apiKey).to.match(/^[0-9a-f]{64}$/);\r",
+									"    \r",
+									"    // Set api_key in collection variables\r",
+									"    pm.collectionVariables.set(\"apiKey\", apiKey);\r",
+									"    pm.collectionVariables.set(\"auth\", `ApiKey ${apiKey}`);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have a valid UUID for id\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response).to.have.property(\"id\");\r",
+									"    const id = response.id;\r",
+									"    pm.expect(id).to.not.be.null;\r",
+									"    pm.expect(id).to.be.a('string');\r",
+									"    pm.expect(id).to.not.be.empty;\r",
+									"    pm.expect(id).to.have.lengthOf(36); // UUID length\r",
+									"    pm.expect(id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);\r",
+									"    \r",
+									"    // Set id in collection variables\r",
+									"    pm.collectionVariables.set(\"userId\", response.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Ciclano\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/users",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "200 /v1/users",
+					"request": {
+						"auth": {
+							"type": "bearer"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "ApiKey {{apiKey}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseURL}}/v1/users",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "/v1/feeds",
 			"item": [
+				{
+					"name": "400 /v1/feeds",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Lane's blog\",\r\n    \"url\": \"https://google.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "201 /v1/feeds - wasglane",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response should have a valid UUID for id\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response).to.have.property(\"id\");\r",
+									"    const id = response.id;\r",
+									"    pm.expect(id).to.not.be.null;\r",
+									"    pm.expect(id).to.be.a('string');\r",
+									"    pm.expect(id).to.not.be.empty;\r",
+									"    pm.expect(id).to.have.lengthOf(36); // UUID length\r",
+									"    pm.expect(id).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);\r",
+									"    \r",
+									"    // Set id in collection variables\r",
+									"    pm.collectionVariables.set(\"feedId\", response.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Lane's blog\",\r\n    \"url\": \"https://www.wagslane.dev/index.xml\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "201 /v1/feeds - bootdev",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Boot Dev's Blog\",\r\n    \"url\": \"https://blog.boot.dev/index.xml\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/v1/feeds",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"v1",
+								"feeds"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "200 /v1/feeds?limit=100&offset=0",
 					"request": {
@@ -60,7 +283,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"feed_id\": \"20e2ef48-b1f6-45e0-b3c4-778cc456424a\"\r\n}",
+							"raw": "{\r\n    \"feed_id\": \"{{feedId}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -220,6 +443,10 @@
 		},
 		{
 			"key": "auth",
+			"value": ""
+		},
+		{
+			"key": "feedId",
 			"value": ""
 		}
 	]
